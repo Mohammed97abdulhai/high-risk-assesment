@@ -205,11 +205,11 @@ class InferenceEngine(KnowledgeEngine):
             print("transactions risk:",risk)
             
             if(risk >=23 and risk <= 35):
-                MainFactors.business_nature_risk = RiskValue.low
+                MainFactors.transaction_risk = RiskValue.low
             elif(risk >= 36 and risk <=55):
-                MainFactors.business_nature_risk = RiskValue.medium
+                MainFactors.transaction_risk = RiskValue.medium
             elif(risk >=56 and risk <=73):
-                MainFactors.business_nature_risk = RiskValue.high
+                MainFactors.transaction_risk = RiskValue.high
 
             print(MainFactors.transaction_risk)
 
@@ -222,6 +222,7 @@ class InferenceEngine(KnowledgeEngine):
     def beneficiary(self):
         print("high risk")
         self.reset()
+        
     @Rule(calculateTotalRisk("yes"),salience = 1)
     def cal(self):
         total = (MainFactors.nationality_risk).value + (MainFactors.transaction_risk).value + (MainFactors.business_nature_risk).value
