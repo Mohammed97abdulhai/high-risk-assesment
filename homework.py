@@ -1,6 +1,7 @@
 from pyknow import *
 from enum import Enum
 from PyInquirer import prompt
+import numpy as np
 
 
 class Nationality(Fact):
@@ -82,11 +83,51 @@ class MainFactors():
 
 
 
+risk_array = np.array([
+    [RiskValue.high, RiskValue.high, RiskValue.high, RiskValue.high],
+    [RiskValue.high, RiskValue.high, RiskValue.medium, RiskValue.high],
+    [RiskValue.high, RiskValue.high, RiskValue.low ,RiskValue.medium],
+    [RiskValue.high, RiskValue.medium, RiskValue.high, RiskValue.high],
+    [RiskValue.high, RiskValue.medium, RiskValue.medium, RiskValue.medium],
+    [RiskValue.high, RiskValue.medium, RiskValue.low, RiskValue.medium],
+    [RiskValue.high, RiskValue.low, RiskValue.high, RiskValue.medium],
+    [RiskValue.high, RiskValue.low, RiskValue.medium, RiskValue.medium],
+    [RiskValue.high, RiskValue.low, RiskValue.low, RiskValue.low],
+    
+    [RiskValue.medium, RiskValue.high, RiskValue.high, RiskValue.high],
+    [RiskValue.medium, RiskValue.high, RiskValue.medium, RiskValue.medium],
+    [RiskValue.medium, RiskValue.high, RiskValue.low, RiskValue.medium],
+    [RiskValue.medium, RiskValue.medium, RiskValue.high, RiskValue.medium],
+    [RiskValue.medium, RiskValue.medium, RiskValue.medium, RiskValue.medium],
+    [RiskValue.medium, RiskValue.medium, RiskValue.low, RiskValue.low],
+    [RiskValue.medium, RiskValue.low, RiskValue.high, RiskValue.medium],
+    [RiskValue.medium, RiskValue.low, RiskValue.medium, RiskValue.low],
+    [RiskValue.medium, RiskValue.low, RiskValue.low,RiskValue.low],
+
+    [RiskValue.low, RiskValue.high, RiskValue.high, RiskValue.medium],
+    [RiskValue.low, RiskValue.high, RiskValue.medium, RiskValue.medium],
+    [RiskValue.low, RiskValue.high, RiskValue.low, RiskValue.low],
+    [RiskValue.low, RiskValue.medium, RiskValue.high, RiskValue.medium],
+    [RiskValue.low, RiskValue.medium, RiskValue.medium, RiskValue.low],
+    [RiskValue.low, RiskValue.medium, RiskValue.low, RiskValue.low],
+    [RiskValue.low, RiskValue.low, RiskValue.high, RiskValue.medium],
+    [RiskValue.low, RiskValue.low, RiskValue.medium, RiskValue.low],
+    [RiskValue.low, RiskValue.low, RiskValue.low, RiskValue.low],
+])
+
+def calculate_riskFactor_value(risk):
+    if(risk >=23 and risk <= 35):
+        return RiskValue.low
+    elif(risk >= 36 and risk <=55):
+        return RiskValue.medium
+    elif(risk >=56 and risk <=73):
+        return RiskValue.high
+
 class InferenceEngine(KnowledgeEngine):
     @DefFacts()
     def func(self):
         yield calculateTotalRisk('yes')
-    #another dumb shit i think but i don't know any other way to represent it and i don't think the deffacts can do the same thing i am trying to do
+    
     high_risk_nations = ["afghanistan","algeria","argentina","bahrain","brazil","china","colombia","cuba","djibouti","egypt","equatorial guinea","gibraltar","greece",
                             "india","indonesia","iran","iraq","lebanon","korea DPR","kuwait"]
     high_risk_business = ["lawyer","accountant","broker"]
@@ -117,13 +158,9 @@ class InferenceEngine(KnowledgeEngine):
 
         #calculate the overall risk
         risk = calculate_the_risk(reputaion,financial_legal,operational,adherence,control_system,procedures)
+        risk = round(risk)
         print("nationality risk:",risk)
-        if(risk >=23 and risk <= 35):
-            MainFactors.nationality_risk = RiskValue.low
-        elif(risk >= 36 and risk <=55):
-            MainFactors.nationality_risk = RiskValue.medium
-        elif(risk >=56 and risk <=73):
-            MainFactors.nationality_risk = RiskValue.high
+        MainFactors.nationality_risk = calculate_riskFactor_value(risk)
         print(MainFactors.nationality_risk)
         
 
@@ -143,14 +180,10 @@ class InferenceEngine(KnowledgeEngine):
 
         #calulate the overall risk
         risk = calculate_the_risk(reputaion1,finanical_legal1,operational1,adherence1,control_system1,procedures1)
+        risk = round(risk)
         print("business risk:",risk)
 
-        if(risk >=23 and risk <= 35):
-            MainFactors.business_nature_risk = RiskValue.low
-        elif(risk >= 36 and risk <=55):
-            MainFactors.business_nature_risk = RiskValue.medium
-        elif(risk >=56 and risk <=73):
-            MainFactors.business_nature_risk = RiskValue.high
+        MainFactors.business_nature_risk = calculate_riskFactor_value(risk)
         print(MainFactors.business_nature_risk)
 
     #medium risk business rule
@@ -169,14 +202,9 @@ class InferenceEngine(KnowledgeEngine):
         
         #calulate the overall risk
         risk = calculate_the_risk(reputaion,finanical_legal,operational,adherence,control_system,procedures)
+        risk = round(risk)
         print("business risk: ",risk)
-        
-        if(risk >=23 and risk <= 35):
-            MainFactors.business_nature_risk = RiskValue.low
-        elif(risk >= 36 and risk <=55):
-            MainFactors.business_nature_risk = RiskValue.medium
-        elif(risk >=56 and risk <=73):
-            MainFactors.business_nature_risk = RiskValue.high
+        MainFactors.business_nature_risk = calculate_riskFactor_value(risk)
         print(MainFactors.business_nature_risk)
     
     # withdrawal limit rule
@@ -184,12 +212,12 @@ class InferenceEngine(KnowledgeEngine):
     def trans_limit_exceeded(self,withdrawal_list,deposit_list, withdrawal_threshold, deposit_threshold):
         withdrawal_checker = False
         deposit_checker = False
-        for i in withdrawal_list : 
-            if i > withdrawal_threshold:
+        for withdrawal in withdrawal_list : 
+            if withdrawal > withdrawal_threshold:
                 withdrawal_checker = True
                 break
-        for i in deposit_list :
-            if i > deposit_threshold:
+        for deposit in deposit_list :
+            if deposit > deposit_threshold:
                 deposit_checker = True
         if deposit_checker or withdrawal_checker :
             reputaion = RiskFactor(50,100)
@@ -202,27 +230,21 @@ class InferenceEngine(KnowledgeEngine):
 
             risk = calculate_the_risk(reputaion, financial_legal,operational,
                     adherence,control_system,procedures)
+            risk = round(risk)
             print("transactions risk:",risk)
-            
-            if(risk >=23 and risk <= 35):
-                MainFactors.transaction_risk = RiskValue.low
-            elif(risk >= 36 and risk <=55):
-                MainFactors.transaction_risk = RiskValue.medium
-            elif(risk >=56 and risk <=73):
-                MainFactors.transaction_risk = RiskValue.high
-
+            MainFactors.transaction_risk = calculate_riskFactor_value(risk)
             print(MainFactors.transaction_risk)
 
     @Rule(EXISTS(InquiredByCML()),salience =6)
     def inquiredbycml(self):
-        print("high risk inq")
+        print("high risk")
         self.reset()
 
     @Rule(Beneficiary(),salience = 6)
     def beneficiary(self):
         print("high risk")
         self.reset()
-        
+
     @Rule(calculateTotalRisk("yes"),salience = 1)
     def cal(self):
         total = (MainFactors.nationality_risk).value + (MainFactors.transaction_risk).value + (MainFactors.business_nature_risk).value
@@ -257,7 +279,6 @@ questions = [
         'type' : 'input',
         'name' : 'mobile',
         'message' : 'enter your mobile phone number',
-        #to do validate the number
         'default' : '0944245'
     },
     {
@@ -282,13 +303,13 @@ questions = [
         'type' : 'input',
         'name' : 'nationality',
         'message' : 'enter your noationality',
-        'default' : "syria"
+        'default' : "algeria"
     },
     {
         'type' : 'checkbox',
         'name' : 'gender',
         'message' : 'choose your gender',
-        'choices' : [{'name' : 'male'} , {'name' : 'female'},{'name': 'non binary'}]
+        'choices' : [{'name' : 'male'} , {'name' : 'female'}]
     },
     {
         'type' : 'checkbox',
@@ -323,7 +344,6 @@ questions = [
         'name' : 'business_nature',
         'message' : 'enter your career job:',
         'default' : 'lawyer'
-        #TODO validate it's a valid job
     },
     {
         'type' : 'input',
@@ -333,20 +353,20 @@ questions = [
     {
         'type' : 'input',
         'name' : 'average_yearly_income',
-        'message' : 'enter your average yearly income:'
-        #TODO :validate it's a number
+        'message' : 'enter your average yearly income:',
+        'default' : '6000'
     },
     {
         'type' : 'input',
         'name' : 'deposit_threshold',
-        'message' : 'enter your deposit threshold'
-        #TODO :validate it's a number
+        'message' : 'enter your deposit threshold',
+        'default' : '400'
     },
     {
         'type' : 'input',
         'name' : 'withdrawal_threshold',
-        'message' : 'enter you withdrawal threshold'
-        #TODO :validate it's a number
+        'message' : 'enter you withdrawal threshold',
+        'default' : '400'
     },
     {
         'type': 'confirm',
@@ -408,10 +428,12 @@ print(withdrawal_transaction)
 print(deposit_transaction)
 inferenceEngine = InferenceEngine()
 inferenceEngine.reset()
-inferenceEngine.declare(Nationality(customer.nationality),BusinessNature(customer.business_nature),
-Transaction(withdrawal_transaction, deposit_transaction, customer.withdrawal_threshold, customer.deposit_threshold))
+inferenceEngine.declare(Nationality(customer.nationality),
+                        BusinessNature(customer.business_nature),
+                        Transaction(withdrawal_transaction, deposit_transaction, customer.withdrawal_threshold, customer.deposit_threshold))
 
 if customer.is_beneficiary:
     inferenceEngine.declare(Beneficiary())
+
 inferenceEngine.run()
 
