@@ -83,6 +83,9 @@ class MainFactors():
 
 
 class InferenceEngine(KnowledgeEngine):
+    @DefFacts()
+    def func(self):
+        yield calculateTotalRisk('yes')
     #another dumb shit i think but i don't know any other way to represent it and i don't think the deffacts can do the same thing i am trying to do
     high_risk_nations = ["afghanistan","algeria","argentina","bahrain","brazil","china","colombia","cuba","djibouti","egypt","equatorial guinea","gibraltar","greece",
                             "india","indonesia","iran","iraq","lebanon","korea DPR","kuwait"]
@@ -209,7 +212,6 @@ class InferenceEngine(KnowledgeEngine):
                 MainFactors.business_nature_risk = RiskValue.high
 
             print(MainFactors.transaction_risk)
-            self.declare(calculateTotalRisk("yes"))
 
     @Rule(EXISTS(InquiredByCML()),salience =6)
     def inquiredbycml(self):
